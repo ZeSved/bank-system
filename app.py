@@ -1,16 +1,25 @@
 import json
+from user import User
+
+USER_SAVE_FILE = './users.json'
+DATA_SAVE_FILE = './data.json'
 
 class Bank:
   def __init__(self):
     try:
-      with open('./data.json', 'r') as data: # Om filen finns 
-        self.buffer = json.load(data)
+      file = open('./users.json', 'r')
+      file.close()
+    except:
+      with open('./users.json', 'w') as data: # Om den inte finns eller något fel har hänt, skapa en ny och hämta den
+        data.write(json.dumps({}))
+
+    try:
+      file = open('./data.json', 'r')
+      file.close()
     except:
       with open('./data.json', 'w') as data: # Om den inte finns eller något fel har hänt, skapa en ny och hämta den
         data.write(json.dumps({}))
 
-      with open('./data.json', 'r') as data:
-        self.buffer = json.load(data)
     self.current_user = ''
     self.logged_in = False
   
@@ -31,16 +40,25 @@ class Bank:
 
   def log_in(self): # Loggar in användaren eller skapar nytt konto om inte namnet finns
     name = input('Name: ')
-    pin = input('PIN: ')
 
-    if self.buffer[name]['pin'] == pin:
-      self.logged_in = True
-      self.current_user = name
-    elif self.buffer[name] is None:
+    names_file = open(USER_SAVE_FILE, 'r')
+    names = json.load(names_file)
+    
+    if name in names['users']:
+      names_file.close()
+      pin = input('PIN: ')
+
+      data_file = open(DATA_SAVE_FILE, 'r')
+      data = json.load(data_file)
+      
+      if self.buffer[name]['pin'] == pin:
+        self.logged_in = True
+        self.current_user = name
+      else:
+        print('Incorrect PIN, please try again.')
+    else:
       print("Couldn't find a user with that name.")
       self.new_user()
-    elif self.buffer[name]['pin'] != pin:
-      print('Incorrect PIN, please try again.')
     
     self.operations()
     
@@ -87,19 +105,22 @@ class Bank:
 
   def operations(self): # "Mitten" funktionen typ, kör efter majoriteten av andra funktioner
     operaiton = input("""
-1. Deposit
-2. Withdraw
-3. Check account
-4. Log out
+1. Open account
+2. Deposit
+3. Withdraw
+4. Check account
+5. Log out
 """)
     match operaiton:
       case '1':
-        self.deposit()
+        self.open_account()
       case '2':
-        self.withdraw()
+        self.deposit()
       case '3':
-        self.check_amount()
+        self.withdraw()
       case '4':
+        self.check_amount()
+      case '5':
         self.log_out()
 
 # Tekniskt sett hela systemet
