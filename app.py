@@ -27,7 +27,7 @@ class Bank:
       print("Couldn't find a user with that name.")
       self.new_user()
     
-    self.operations()
+    self.operations('main')
     
   def log_out(self): # Loggar ut och sparar all data till databasen
     self.logged_in = False
@@ -35,23 +35,27 @@ class Bank:
     backend.save_and_quit()
   
   def withdraw(self): # Tar ut pengar
-    pass
+    backend.opened_account.withdraw()
   
   def deposit(self): # Lägger in pengar
-    pass
+    backend.opened_account.deposit()
   
-  def check_amount(self): # Visar saldo
-    print(f'Current amount in account: {self.buffer[self.current_user]['saldo']}')
-    self.operations()
+  def check_revenue(self): # Visar saldo
+    print(f'Current amount in account: {backend.get_account_revenue()}')
+    self.operations('account')
   
   def open_account(self):
-    accounts = backend.retrieve_accounts()
-    
+    accounts = [account.name for account in backend.retrieve_accounts()]
+
     print('Your accounts:')
     for account in accounts:
-      print(account.name)
+      print(account)
     
-    input('Which account would you like to open?: ')
+    chosen_account = input('Which account would you like to open?: ')
+
+    backend.open_account(chosen_account)
+
+    self.operations('account')
 
   def operations(self, stage): # "Mitten" funktionen typ, kör efter majoriteten av andra funktioner
     main = """
@@ -94,25 +98,8 @@ class Bank:
         case '5':
           self.transactions()
         case '6':
+          backend.exit_account()
           self.operations('main')
-#     operaiton = input("""
-# 1. Open account
-# 2. Deposit
-# 3. Withdraw
-# 4. Check account
-# 5. Log out
-# """)
-#     match operaiton:
-#       case '1':
-#         self.open_account()
-#       case '2':
-#         self.deposit()
-#       case '3':
-#         self.withdraw()
-#       case '4':
-#         self.check_amount()
-#       case '5':
-#         self.log_out()
 
 # Tekniskt sett hela systemet
 bank = Bank()

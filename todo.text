@@ -1,7 +1,7 @@
-create memory class
-  saves and loads users and data
-  potentiallyt a simpleton class if needed
-
-revamp login system to suit the new needs
-
-add more operations to support multiple bank accounts
+transaction history
+transactions at all
+  between accounts
+  between users
+  
+create accounts
+delete account

@@ -9,6 +9,7 @@ class _Backend:
   def __init__(self):
     self.current_user = ''
     self.save_file_path = ''
+    self.opened_account = None
 
     if not os.path.exists(USER_SAVE_FILE):
       with open(USER_SAVE_FILE, 'w') as data: # Om den inte finns eller något fel har hänt, skapa en ny och hämta den
@@ -62,5 +63,26 @@ class _Backend:
   
   def retrieve_accounts(self):
     return self.current_user.accounts
+  
+  def open_account(self, name):
+    for account in self.current_user.accounts:
+      if account.name == name: self.opened_account = account
+  
+  def exit_account(self):
+    index = -1
+
+    for account in self.current_user.accounts:
+      index += 1
+
+      if account.name == self.opened_account.name:
+        break
+    
+    self.current_user.accounts[index] = self.opened_account
+
+    self.opened_account = None
+  
+  def get_account_revenue(self):
+    return self.opened_account.amount
+
 
 backend = _Backend()

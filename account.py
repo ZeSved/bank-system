@@ -9,24 +9,23 @@ class Account:
       amount_to_deposit = input('Amount to deposit: ')
     amount_to_deposit = int(amount_to_deposit)
 
-    saldo = self.buffer[self.current_user]['saldo']
-    self.buffer[self.current_user]['saldo'] = saldo + amount_to_deposit
+    old_amount = self.amount
 
     if amount_to_deposit <= 0: # Ser till så att mängden att lägga in är mer än 0
       print('Invalid amount, must be above 0.')
     else:
-      print(f'Successfully deposited {amount_to_deposit}, new amount {saldo + amount_to_deposit}')
+      print(f'Successfully deposited {amount_to_deposit}, new amount {old_amount + amount_to_deposit}')
   
   def withdraw(self):
     while not (amount := input('Amount to withdraw: ')).isdigit(): # Ser till så att mängden är en siffra
       amount = input('Amount to withdraw: ')
     amount = int(amount)
 
-    saldo = self.buffer[self.current_user]['saldo']
+    old_amount = self.amount
 
-    if saldo >= amount: # Ser till så att man inte kan ta ut mer pengar än vad som finns
-      new_amount = saldo - amount
-      self.buffer[self.current_user]['saldo'] = new_amount
+    if old_amount >= amount: # Ser till så att man inte kan ta ut mer pengar än vad som finns
+      new_amount = old_amount - amount
+      self.amount = new_amount
       print(f'{amount} withdrawn, {new_amount} remaining')
     else:
       print('Invalid transaction, number too high.')
