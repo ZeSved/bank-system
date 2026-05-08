@@ -1,6 +1,4 @@
-import json
-from user import User
-from memory import database
+from backend import backend
 import random
 
 class Bank:
@@ -12,16 +10,16 @@ class Bank:
     pin = random.randint(1000, 9999)
     print(f'Your pin is {pin}')
 
-    database.new_user(name, pin)
+    backend.new_user(name, pin)
     self.logged_in = True
 
   def log_in(self): # Loggar in användaren eller skapar nytt konto om inte namnet finns
     name = input('Name: ')
     
-    if database.check_user_exists(name):
+    if backend.check_user_exists(name):
       pin = input('PIN: ')
 
-      if database.check_pin(name, pin):
+      if backend.check_pin(name, pin):
         self.logged_in = True
       else:
         print('Incorrect PIN, please try again.')
@@ -34,7 +32,7 @@ class Bank:
   def log_out(self): # Loggar ut och sparar all data till databasen
     self.logged_in = False
 
-    database.save_and_quit()
+    backend.save_and_quit()
   
   def withdraw(self): # Tar ut pengar
     pass
@@ -45,6 +43,15 @@ class Bank:
   def check_amount(self): # Visar saldo
     print(f'Current amount in account: {self.buffer[self.current_user]['saldo']}')
     self.operations()
+  
+  def open_account(self):
+    accounts = backend.retrieve_accounts()
+    
+    print('Your accounts:')
+    for account in accounts:
+      print(account.name)
+    
+    input('Which account would you like to open?: ')
 
   def operations(self, stage): # "Mitten" funktionen typ, kör efter majoriteten av andra funktioner
     main = """
@@ -61,24 +68,51 @@ class Bank:
 5. Transaction history
 6. Exit account
 """
-    operaiton = input("""
-1. Open account
-2. Deposit
-3. Withdraw
-4. Check account
-5. Log out
-""")
-    match operaiton:
-      case '1':
-        self.open_account()
-      case '2':
-        self.deposit()
-      case '3':
-        self.withdraw()
-      case '4':
-        self.check_amount()
-      case '5':
-        self.log_out()
+
+    if stage == 'main':
+      operation = input(main)
+
+      match operation:
+        case '1':
+          self.open_account()
+        case '2':
+          self.create_account()
+        case '3':
+          self.log_out()
+    elif stage == 'account':
+      operation = input(account)
+
+      match operation:
+        case '1':
+          self.deposit()
+        case '2':
+          self.withdraw()
+        case '3':
+          self.check_revenue()
+        case '4':
+          self.transfer()
+        case '5':
+          self.transactions()
+        case '6':
+          self.operations('main')
+#     operaiton = input("""
+# 1. Open account
+# 2. Deposit
+# 3. Withdraw
+# 4. Check account
+# 5. Log out
+# """)
+#     match operaiton:
+#       case '1':
+#         self.open_account()
+#       case '2':
+#         self.deposit()
+#       case '3':
+#         self.withdraw()
+#       case '4':
+#         self.check_amount()
+#       case '5':
+#         self.log_out()
 
 # Tekniskt sett hela systemet
 bank = Bank()

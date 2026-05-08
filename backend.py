@@ -5,7 +5,7 @@ from user import User
 USER_SAVE_FILE = './users.json'
 DATA_SAVE_PATH = './user_data/'
 
-class _Database:
+class _Backend:
   def __init__(self):
     self.current_user = ''
     self.save_file_path = ''
@@ -59,5 +59,8 @@ class _Database:
     
     user = User(name, pin, [], [])
     self.current_user = user
+  
+  def retrieve_accounts(self):
+    return self.current_user.accounts
 
-database = _Database()
+backend = _Backend()
