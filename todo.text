@@ -1,7 +1,18 @@
-transaction history
-transactions at all
-  between accounts
-  between users
-  
-create accounts
-delete account
+tests:
+create user-
+log out
+log in-
+create account-
+check revenue-
+deposit-
+withdraw-
+open account-
+delete account-
+create multiple accounts-
+transactions between accounts
+
+create multiple users
+transactions between multiple users
+
+
+fix logout issue (something turning objects into dicts)

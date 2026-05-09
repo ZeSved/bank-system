@@ -7,11 +7,13 @@ class Bank:
   
   def new_user(self): # Skapar en ny användare
     name = input('Name: ')
-    pin = random.randint(1000, 9999)
+    pin = str(random.randint(1000, 9999))
     print(f'Your pin is {pin}')
 
     backend.new_user(name, pin)
     self.logged_in = True
+
+    self.operations('main')
 
   def log_in(self): # Loggar in användaren eller skapar nytt konto om inte namnet finns
     name = input('Name: ')
@@ -19,10 +21,11 @@ class Bank:
     if backend.check_user_exists(name):
       pin = input('PIN: ')
 
-      if backend.check_pin(name, pin):
+      if backend.log_in(name, pin)['approved']:
         self.logged_in = True
       else:
         print('Incorrect PIN, please try again.')
+        return
     else:
       print("Couldn't find a user with that name.")
       self.new_user()
@@ -33,19 +36,58 @@ class Bank:
     self.logged_in = False
 
     backend.save_and_quit()
-  
+
+  def create_account(self):
+    name = input('Account name: ')
+
+    backend.create_account(name)
+
+    self.operations('account')
+
+  def delete_account(self):
+    backend.delete_account()
+
+    self.operations('main')
+
   def withdraw(self): # Tar ut pengar
     backend.opened_account.withdraw()
+    self.operations('account')
   
   def deposit(self): # Lägger in pengar
     backend.opened_account.deposit()
+    self.operations('account')
   
   def check_revenue(self): # Visar saldo
     print(f'Current amount in account: {backend.get_account_revenue()}')
     self.operations('account')
+
+  def transaction(self):
+    question = """
+To another user?
+1. Yes
+2. No
+
+> 
+"""
+
+    to_another_user = True if input(question) == '1' else False
+
+    to_account = input('To account: ')
+    amount = input('Amount to transfer: ')
+    from_account = input('From account: ')
+
+    if to_another_user:
+      to_user = input('To user: ')
+      current_user_pin = input('Current user PIN: ')
+      receiving_user_pin = input('Receiving user PIN: ')
+
+      backend.transaction(from_account, to_account, amount, to_user, current_user_pin, receiving_user_pin)
+    else:
+      backend.transaction(from_account, to_account, amount)
   
   def open_account(self):
     accounts = [account.name for account in backend.retrieve_accounts()]
+    # accounts = [account.name for account in backend.retrieve_accounts()]
 
     print('Your accounts:')
     for account in accounts:
@@ -62,7 +104,9 @@ class Bank:
 1. Open account
 2. Create account
 3. Log out
-"""
+4. Transfer between accounts
+
+> """
 
     account = """
 1. Deposit
@@ -71,7 +115,9 @@ class Bank:
 4. Transfer to different account
 5. Transaction history
 6. Exit account
-"""
+7. Delete account
+
+> """
 
     if stage == 'main':
       operation = input(main)
@@ -100,6 +146,9 @@ class Bank:
         case '6':
           backend.exit_account()
           self.operations('main')
+        case '7':
+          backend.delete_account()
+          self.operations('main')
 
 # Tekniskt sett hela systemet
 bank = Bank()
@@ -110,7 +159,8 @@ while command != '3':
 1. Sign up
 2. Log in
 3. Quit
-""")
+
+> """)
   match command:
     case '1':
       bank.new_user()
