@@ -37,14 +37,14 @@ class Bank:
 
     backend.save_and_quit()
 
-  def create_account(self):
+  def create_account(self): # Skapar ett bankkonto
     name = input('Account name: ')
 
     backend.create_account(name)
 
     self.operations('account')
 
-  def delete_account(self):
+  def delete_account(self): # Raderar bankkontot
     backend.delete_account()
 
     self.operations('main')
@@ -61,17 +61,17 @@ class Bank:
     print(f'Current amount in account: {backend.get_account_revenue()}')
     self.operations('account')
 
-  def transaction(self):
+  def transaction(self): # Skickar pengar mellan bankkonton
     to_account = input('To bank account: ')
     amount = input('Amount to transfer: ')
 
     backend.transaction(backend.opened_account.name, to_account, amount)
     self.operations('main')
   
-  def open_account(self):
+  def open_account(self): # Öppnar konton
     accounts = [account.name for account in backend.retrieve_accounts()]
 
-    if len(accounts) == 0:
+    if len(accounts) == 0: # Ger inte användaren möjlighet att öppna konton om inga finns
       print("You don't have any accounts")
       return self.operations('main')
     
@@ -85,7 +85,7 @@ class Bank:
 
     self.operations('account')
   
-  def transactions(self):
+  def transactions(self): # Visar överförings historiken
     for transaction in backend.opened_account.transaction_history:
       print(f"""
 From account: {transaction.from_account}
@@ -114,7 +114,7 @@ Amount: {transaction.amount}
 
 > """
 
-    if stage == 'main':
+    if stage == 'main': # Alla de olika operationerna man kan göra
       operation = input(main)
 
       match operation:

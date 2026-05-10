@@ -5,6 +5,7 @@ from account import Account
 from transaction import Transaction
 from pathlib import Path
 
+# Viktiga paths
 USER_SAVE_FILE = './users.json'
 DATA_SAVE_PATH = './user_data/'
 
@@ -19,21 +20,23 @@ class _Backend:
         data.write(json.dumps({'users': []}))
     elif os.path.exists(USER_SAVE_FILE):
       file = open(USER_SAVE_FILE, 'r')
-      if file.readline() == '':
+
+      if file.readline() == '': # Om filen finns men den är tom
         file.close()
+
         with open(USER_SAVE_FILE, 'w') as data:
           data.write(json.dumps({'users': []}))
 
-    if not os.path.exists(DATA_SAVE_PATH):
+    if not os.path.exists(DATA_SAVE_PATH): # Om inte användarsparmappen finns, skapa den
       os.mkdir(DATA_SAVE_PATH)
     
-  def check_user_exists(self, name):
+  def check_user_exists(self, name): # Kolla så att användaren finns
     with open(USER_SAVE_FILE, 'r') as file:
       data = json.load(file)
       
       return name in data['users']
   
-  def check_pin(self, name, pin):
+  def check_pin(self, name, pin): # Kolla så att PIN koden stämmer
     save_file_path = f'{DATA_SAVE_PATH}{name}{pin}.json'
     path = Path(save_file_path)
 
@@ -42,14 +45,14 @@ class _Backend:
       return True
     else: return False
     
-  def log_in(self, name, pin):
+  def log_in(self, name, pin): # Logga in användaren
     print(name, pin, 'login')
     if self.check_pin(name, pin):
       with open(self.save_file_path, 'r') as file:
         data = json.load(file)
 
         account_arr = []
-        for account in data['accounts']:
+        for account in data['accounts']: # Skapa objekt för all den sparade datan så att systemet kan använda det
           acc_class = Account(name=account['name'], amount=account['amount'], transaction_history=account['transaction history'])
 
           transaction_arr = []
@@ -70,13 +73,11 @@ class _Backend:
 
         self.current_user = User(name, pin, account_arr)
 
-        print(self.current_user, 'user')
-        print(self.save_file_path, 'save file path')
         return {'approved': True}
     else:
       return {'approved': False}
   
-  def new_user(self, name, pin):
+  def new_user(self, name, pin): # Skapar en ny användare
     self.save_file_path = f'{DATA_SAVE_PATH}{name}{pin}.json'
 
     with open(USER_SAVE_FILE, 'r') as file:
@@ -90,23 +91,23 @@ class _Backend:
     user = User(name, pin, [])
     self.current_user = user
   
-  def create_account(self, name):
+  def create_account(self, name): # Skapar ett nytt konto
     account = Account(name)
 
     self.current_user.accounts.append(account)
     self.opened_account = account
   
-  def retrieve_accounts(self):
+  def retrieve_accounts(self): # Skickar tillbaks en lista av alla konton som den nuvarande användaren har
     return self.current_user.accounts
   
-  def open_account(self, name):
+  def open_account(self, name): # Öppnar ett konto
     for account in self.retrieve_accounts():
       if account.name == name: self.opened_account = account
   
-  def get_account_revenue(self):
+  def get_account_revenue(self): # Visar hur mycket pengar som finns på kontot
     return self.opened_account.amount
   
-  def get_account_index(self, name):
+  def get_account_index(self, name): # Visar vart i kontolistan som ett specifikt konto finns
     index = -1
 
     for account in self.retrieve_accounts():
@@ -114,14 +115,14 @@ class _Backend:
 
       if account.name == name: return index
   
-  def exit_account(self):
+  def exit_account(self): # Lämnar ett konto
     index = self.get_account_index(self.opened_account.name)
     
     self.current_user.accounts[index] = self.opened_account
 
     self.opened_account = ''
   
-  def delete_account(self):
+  def delete_account(self): # Raderar ett konto OM användaren skriver in rätt PIN kod
     pin = input('PIN code: ')
     if not self.current_user.code == pin:
       return print('Incorrect PIN.')
@@ -134,7 +135,7 @@ class _Backend:
       
     return print('Account not found.')
   
-  def transaction(self, from_account, to_account, amount, to_user = None, current_user_pin = None, receiving_user_pin = None):
+  def transaction(self, from_account, to_account, amount, to_user = None, current_user_pin = None, receiving_user_pin = None): # Överföringar mellan konton
 
     def withdraw(account, amount):
       self.open_account(account)
@@ -150,11 +151,11 @@ class _Backend:
 
     deposit(to_account, amount)
    
-  def save_and_quit(self):
+  def save_and_quit(self): # Sparar all data i filer och loggar ut användaren helt
     with open(self.save_file_path, 'w') as file:
       account_arr = []
 
-      for account in self.retrieve_accounts():
+      for account in self.retrieve_accounts(): # Gör om alla objekt till dictionaries som kan laddas in i filer
         transaction_arr = []
 
         for trans in account.transaction_history:
@@ -185,4 +186,5 @@ class _Backend:
       self.current_user = ''
       self.save_file_path = ''
 
+# Simpleton class (helt onödigt igentligen)
 backend = _Backend()
