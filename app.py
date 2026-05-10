@@ -62,33 +62,19 @@ class Bank:
     self.operations('account')
 
   def transaction(self):
-    question = """
-To another user?
-1. Yes
-2. No
-
-> 
-"""
-
-    to_another_user = True if input(question) == '1' else False
-
-    to_account = input('To account: ')
+    to_account = input('To bank account: ')
     amount = input('Amount to transfer: ')
-    from_account = input('From account: ')
 
-    if to_another_user:
-      to_user = input('To user: ')
-      current_user_pin = input('Current user PIN: ')
-      receiving_user_pin = input('Receiving user PIN: ')
-
-      backend.transaction(from_account, to_account, amount, to_user, current_user_pin, receiving_user_pin)
-    else:
-      backend.transaction(from_account, to_account, amount)
+    backend.transaction(backend.opened_account.name, to_account, amount)
+    self.operations('main')
   
   def open_account(self):
     accounts = [account.name for account in backend.retrieve_accounts()]
-    # accounts = [account.name for account in backend.retrieve_accounts()]
 
+    if len(accounts) == 0:
+      print("You don't have any accounts")
+      return self.operations('main')
+    
     print('Your accounts:')
     for account in accounts:
       print(account)
@@ -98,13 +84,22 @@ To another user?
     backend.open_account(chosen_account)
 
     self.operations('account')
+  
+  def transactions(self):
+    for transaction in backend.opened_account.transaction_history:
+      print(f"""
+From account: {transaction.from_account}
+To account: {transaction.to_account}
+Amount: {transaction.amount}
+""")
+      
+    self.operations('account')
 
   def operations(self, stage): # "Mitten" funktionen typ, kör efter majoriteten av andra funktioner
     main = """
 1. Open account
 2. Create account
 3. Log out
-4. Transfer between accounts
 
 > """
 
@@ -140,7 +135,7 @@ To another user?
         case '3':
           self.check_revenue()
         case '4':
-          self.transfer()
+          self.transaction()
         case '5':
           self.transactions()
         case '6':

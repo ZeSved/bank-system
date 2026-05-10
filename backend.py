@@ -43,6 +43,7 @@ class _Backend:
     else: return False
     
   def log_in(self, name, pin):
+    print(name, pin, 'login')
     if self.check_pin(name, pin):
       with open(self.save_file_path, 'r') as file:
         data = json.load(file)
@@ -63,10 +64,14 @@ class _Backend:
 
             transaction_arr.append(trans_class)
           
+          acc_class.transaction_history = transaction_arr
+          
           account_arr.append(acc_class)
 
         self.current_user = User(name, pin, account_arr)
 
+        print(self.current_user, 'user')
+        print(self.save_file_path, 'save file path')
         return {'approved': True}
     else:
       return {'approved': False}
@@ -86,7 +91,6 @@ class _Backend:
     self.current_user = user
   
   def create_account(self, name):
-    print(self.current_user)
     account = Account(name)
 
     self.current_user.accounts.append(account)
@@ -115,7 +119,7 @@ class _Backend:
     
     self.current_user.accounts[index] = self.opened_account
 
-    self.opened_account = None
+    self.opened_account = ''
   
   def delete_account(self):
     pin = input('PIN code: ')
@@ -132,32 +136,20 @@ class _Backend:
   
   def transaction(self, from_account, to_account, amount, to_user = None, current_user_pin = None, receiving_user_pin = None):
 
-    def util(action, account, amount):
-      if action == 'withdraw':
-        self.open_account(account)
-        self.opened_account.withdraw(amount)
-        self.exit_account()
-      elif action == 'deposit':
-        self.open_account(account)
-        self.opened_account.deposit(amount)
-        self.exit_account()
+    def withdraw(account, amount):
+      self.open_account(account)
+      self.opened_account.withdraw(amount)
+      self.exit_account()
+    
+    def deposit(account, amount):
+      self.open_account(account)
+      self.opened_account.deposit(amount)
+      self.exit_account()
+      
+    withdraw(from_account, amount)
 
-    if to_user is None:
-      util('withdraw', from_account, amount)
-
-      util('deposit', to_account, amount)
-    else:
-      current_user_name = self.current_user.name
-      if self.check_user_exists(to_user) and self.check_pin(to_account, receiving_user_pin) and self.current_user.code == current_user_pin:
-        util('withdraw', from_account, amount)
-        self.save_and_quit()
-
-        self.log_in(to_user, receiving_user_pin)
-        util('deposit', to_account, amount)
-        self.save_and_quit()
-
-        self.log_in(current_user_name, current_user_pin)
-  
+    deposit(to_account, amount)
+   
   def save_and_quit(self):
     with open(self.save_file_path, 'w') as file:
       account_arr = []
@@ -166,7 +158,6 @@ class _Backend:
         transaction_arr = []
 
         for trans in account.transaction_history:
-          print(trans)
           trans_data = {
             'amount': trans.amount,
             'from_account': trans.from_account,
